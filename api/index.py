@@ -81,10 +81,30 @@ def _run_firewall_and_log(
     lo necesario para que cada canal (WhatsApp, web, etc.) construya
     su propia respuesta. Esta función NO sabe nada de WhatsApp ni de
     HTTP — por diseño, para que cualquier canal nuevo la reuse igual."""
+    # Capa 1 — reglas regex: rápidas y deterministas.
     score, matches = firewall.analyze(text)
+    matches_payload = [asdict(m) for m in matches]
+
+    # Capa 2 — clasificador semántico (Claude): solo si las reglas no
+    # bloquearon ya. Atrapa intención dañina disfrazada con eufemismos o
+    # metáforas que el regex no puede ver (p. ej. "disolver un pollo de 75kg").
+    if not firewall.is_blocked(score):
+        verdict_ai = claude_client.moderate(text)
+        if verdict_ai and verdict_ai["flagged"]:
+            weight = {"alto": 70, "medio": 35, "bajo": 15}.get(verdict_ai["severity"], 70)
+            matches_payload.append(
+                {
+                    "rule_id": "AI-MOD",
+                    "category": "harmful_content",
+                    "weight": weight,
+                    "description": "Clasificador de IA: " + verdict_ai["reason"],
+                    "snippet": text[:80] + ("…" if len(text) > 80 else ""),
+                }
+            )
+            score = min(100, score + weight)
+
     level = firewall.risk_level(score)
     blocked = firewall.is_blocked(score)
-    matches_payload = [asdict(m) for m in matches]
 
     bot_text = None
     claude_stub = None
