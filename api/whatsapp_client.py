@@ -82,25 +82,52 @@ def send_whatsapp_message(to: str, text: str) -> dict:
 
 
 def extract_incoming_message(payload: dict) -> dict | None:
-    """Extrae el primer mensaje de texto entrante del payload estándar
-    de webhook de Meta (Kapso lo reenvía sin modificar cuando el
-    webhook se registra con kind="meta"). Regresa None si el payload
-    no contiene un mensaje de texto (puede ser un evento de status,
-    confirmación de entrega, etc.)."""
-    try:
-        entry = payload["entry"][0]
-        change = entry["changes"][0]
-        value = change["value"]
-        messages = value.get("messages")
-        if not messages:
+    """Extrae el primer mensaje de texto entrante del webhook de Kapso.
+
+    Soporta los DOS formatos que Kapso puede enviar:
+
+      - kind="kapso" (requerido para números sandbox): el payload trae el
+        mensaje directo en `message`, con `message.from` y `message.text.body`.
+      - kind="meta" (números productivos): reenvía el payload EXACTO de Meta,
+        anidado en `entry[].changes[].value.messages[]`.
+
+    Regresa None si no hay un mensaje de texto ENTRANTE (eventos de status,
+    confirmaciones de entrega, o mensajes salientes nuestros — para no
+    entrar en bucle respondiéndonos a nosotros mismos)."""
+    if not isinstance(payload, dict):
+        return None
+
+    # ---- Formato Kapso (kind="kapso") ----
+    message = payload.get("message")
+    if isinstance(message, dict) and message.get("from"):
+        # Ignora cualquier cosa que no sea claramente un entrante de texto.
+        direction = message.get("direction") or (payload.get("kapso") or {}).get("direction")
+        if direction and direction not in ("inbound", "incoming", "received"):
             return None
-        message = messages[0]
-        if message.get("type") != "text":
+        if message.get("type", "text") != "text":
+            return None
+        body = (message.get("text") or {}).get("body")
+        if not body:
             return None
         return {
             "from_number": message["from"],
-            "text": message["text"]["body"],
+            "text": body,
             "message_id": message.get("id"),
+        }
+
+    # ---- Formato Meta (kind="meta") ----
+    try:
+        value = payload["entry"][0]["changes"][0]["value"]
+        messages = value.get("messages")
+        if not messages:
+            return None
+        meta_msg = messages[0]
+        if meta_msg.get("type") != "text":
+            return None
+        return {
+            "from_number": meta_msg["from"],
+            "text": meta_msg["text"]["body"],
+            "message_id": meta_msg.get("id"),
         }
     except (KeyError, IndexError, TypeError):
         return None
