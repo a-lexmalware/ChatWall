@@ -232,7 +232,7 @@ def debug_fs():
         except Exception as e:
             return f"ERROR: {e}"
 
-    public_dir = parent / "public"
+    public_dir = parent / "static"
 
     return {
         "__file__": str(Path(__file__).resolve()),
@@ -258,6 +258,10 @@ from pathlib import Path
 
 from fastapi.staticfiles import StaticFiles
 
-_PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
+# OJO: la carpeta NO puede llamarse "public" — ese nombre es reservado
+# en Vercel y su contenido se sube al CDN estático y se EXCLUYE del
+# bundle de la función serverless, por lo que aquí no existiría. Por eso
+# se llama "static": así viaja dentro de la función y la app la sirve.
+_PUBLIC_DIR = Path(__file__).resolve().parent.parent / "static"
 if _PUBLIC_DIR.exists():
     app.mount("/", StaticFiles(directory=str(_PUBLIC_DIR), html=True), name="static")
