@@ -197,23 +197,34 @@ def stats():
 
 @app.post("/api/whatsapp/webhook")
 async def receive_whatsapp(request: Request):
-    """Recibe mensajes entrantes de WhatsApp (reenviados por Kapso con
-    el formato exacto de Meta). Siempre responde 200, o el proveedor
-    reintenta el webhook indefinidamente pensando que falló."""
-    payload = await request.json()
-    incoming = whatsapp_client.extract_incoming_message(payload)
+    """Recibe mensajes entrantes de WhatsApp vía Kapso. SIEMPRE responde 200,
+    o el proveedor reintenta el webhook en bucle pensando que falló (por eso
+    el envío de la respuesta va envuelto en try/except: si Kapso rechaza el
+    envío, el análisis ya quedó registrado y no queremos romper el webhook)."""
+    try:
+        payload = await request.json()
+    except Exception:
+        return {"status": "ignored"}
 
+    incoming = whatsapp_client.extract_incoming_message(payload)
     if incoming is None:
-        # No es un mensaje de texto (puede ser un evento de status,
-        # confirmación de entrega, etc.) — no hay nada que analizar.
+        # No es un mensaje de texto entrante (status, entrega, saliente…).
         return {"status": "ignored"}
 
     result = _run_firewall_and_log(
         incoming["text"], channel="whatsapp", from_number=incoming["from_number"]
     )
-    whatsapp_client.send_whatsapp_message(incoming["from_number"], result["reply"])
 
-    return {"status": "blocked" if result["blocked"] else "forwarded"}
+    try:
+        whatsapp_client.send_whatsapp_message(incoming["from_number"], result["reply"])
+        sent = True
+    except Exception:
+        sent = False
+
+    return {
+        "status": "blocked" if result["blocked"] else "forwarded",
+        "reply_sent": sent,
+    }
 
 
 # ---------------------------------------------------------------------------
