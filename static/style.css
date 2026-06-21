@@ -5,38 +5,42 @@
    ========================================================================= */
 
 :root {
-  /* ---- Superficies (de fondo a primer plano) ---- */
-  --bg:            #0c0f15;
-  --bg-2:          #0f131b;
-  --surface:       #141923;
-  --surface-2:     #1a2029;
-  --surface-3:     #20272f;
-  --border:        #2a313c;
-  --border-soft:   #222934;
-  --border-strong: #333c49;
+  /* ---- Superficies (negro con tinte azul marino, de fondo a frente) ---- */
+  --bg:            #04060a;
+  --bg-2:          #070a11;
+  --surface:       #0b1019;
+  --surface-2:     #101724;
+  --surface-3:     #18212f;
+  --border:        #233040;
+  --border-soft:   #1a2331;
+  --border-strong: #2e3c4d;
 
   /* ---- Texto ---- */
-  --text:       #e9edf3;
-  --text-dim:   #9aa4b2;
-  --text-faint: #616b7a;
+  --text:       #e8eef5;
+  --text-dim:   #93a2b5;
+  --text-faint: #566476;
 
   /* ---- Acentos semánticos ---- */
-  --accent:      #5b8cff;   /* azul acero — primario / riesgo bajo */
-  --accent-2:    #6f9bff;
-  --accent-soft: #5b8cff1f;
-  --accent-line: #5b8cff3d;
+  --accent:      #22c277;   /* verde — primario / riesgo bajo / permitido */
+  --accent-2:    #31db8a;
+  --accent-soft: #22c2771c;
+  --accent-line: #22c27740;
 
-  --warn:        #e3a44a;   /* ámbar — riesgo medio */
-  --warn-soft:   #e3a44a1c;
-  --warn-line:   #e3a44a3d;
+  --blue:        #2b66e0;   /* azul oscuro — color de apoyo (web, fondo, hero) */
+  --blue-soft:   #2b66e01f;
+  --blue-line:   #2b66e045;
+
+  --warn:        #d9a43f;   /* ámbar — riesgo medio (precaución) */
+  --warn-soft:   #d9a43f1c;
+  --warn-line:   #d9a43f3d;
 
   --danger:      #ec5b54;   /* rojo — riesgo alto / bloqueado */
   --danger-soft: #ec5b541c;
   --danger-line: #ec5b543d;
 
-  --ok:          #3fc296;   /* teal — permitido */
-  --ok-soft:     #3fc2961c;
-  --ok-line:     #3fc2963d;
+  --ok:          #22c277;   /* verde — permitido (mismo que el primario) */
+  --ok-soft:     #22c2771c;
+  --ok-line:     #22c27740;
 
   /* ---- Tipografía ---- */
   --font-ui: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
@@ -111,7 +115,7 @@ a { color: var(--accent); text-decoration: none; }
   gap: 16px;
   padding: 16px clamp(16px, 4vw, 32px);
   border-bottom: 1px solid var(--border-soft);
-  background: linear-gradient(180deg, #12161e 0%, #12161e00 100%);
+  background: linear-gradient(180deg, #0a0f18 0%, #0a0f1800 100%);
   backdrop-filter: blur(6px);
   position: sticky;
   top: 0;
@@ -211,7 +215,7 @@ html { scroll-behavior: smooth; }
   border: 1px solid var(--border-soft); background: var(--surface); color: var(--text-dim);
 }
 .chan-tag--whatsapp { color: #25d366; border-color: #25d36633; background: #25d3660f; }
-.chan-tag--web { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+.chan-tag--web { color: var(--blue); border-color: var(--blue-line); background: var(--blue-soft); }
 .chan-tag--dashboard { color: var(--text); }
 .chan-tag--more { color: var(--text-faint); font-weight: 500; border-style: dashed; }
 .hero__cta { font-size: 15px; padding: 13px 22px; }
@@ -636,7 +640,7 @@ html { scroll-behavior: smooth; }
 }
 .chan::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .chan--whatsapp { color: #25d366; background: #25d36618; }
-.chan--web { color: var(--accent); background: var(--accent-soft); }
+.chan--web { color: var(--blue); background: var(--blue-soft); }
 .chan--dashboard { color: var(--text-dim); background: var(--surface-3); }
 
 .pill {
