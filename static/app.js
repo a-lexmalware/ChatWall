@@ -1,5 +1,5 @@
 /* =========================================================================
-   PromptGuard — app.js
+   ChatWall — app.js
    Sin frameworks. Habla con la API FastAPI vía fetch (mismo origen: el
    backend sirve este frontend como estáticos).
    ========================================================================= */
