@@ -34,8 +34,19 @@ import os
 KAPSO_API_BASE = "https://api.kapso.ai"
 GRAPH_API_VERSION = "v24.0"
 
-KAPSO_API_KEY = os.environ.get("KAPSO_API_KEY")
-KAPSO_PHONE_NUMBER_ID = os.environ.get("KAPSO_PHONE_NUMBER_ID")
+
+def _env(name: str) -> str | None:
+    """Lee una variable de entorno limpiando espacios y comillas que se
+    cuelan al pegar valores en el dashboard de Vercel."""
+    value = os.environ.get(name)
+    if value is None:
+        return None
+    cleaned = value.strip().strip('"').strip("'").strip()
+    return cleaned or None
+
+
+KAPSO_API_KEY = _env("KAPSO_API_KEY")
+KAPSO_PHONE_NUMBER_ID = _env("KAPSO_PHONE_NUMBER_ID")
 
 
 def is_configured() -> bool:
